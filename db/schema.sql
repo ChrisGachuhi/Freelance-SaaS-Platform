@@ -1,6 +1,6 @@
 -- USERS
 CREATE TABLE IF NOT EXISTS users(
-    id SERIAL PRIMARY KEY, --we use SERIAL so that it increments automatically
+    id SERIAL PRIMARY KEY, --we use SERIAL so that it increments ids automatically
     name VARCHAR(100) NOT NULL,
     email VARCHAR(100) NOT NULL UNIQUE,
     role VARCHAR(20) NOT NULL CHECK(role('client', 'freelancer', 'admin')), 
@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users(
 -- JOBS
 CREATE TABLE IF NOT EXISTS jobs(
     id SERIAL PRIMARY KEY,
-    client_id INTEGER NOT NULL REFERENCES users(id) on DELETE CASCADE,
+    client_id INTEGER NOT NULL REFERENCES users(id) on DELETE CASCADE, --Deletes child rows if parent is deleted
     title VARCHAR(200) NOT NULL,
     description TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
