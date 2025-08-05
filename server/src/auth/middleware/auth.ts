@@ -1,30 +1,29 @@
 import { Request, Response, NextFunction } from 'express'
-import jwt from 'jsonwebtoken'
+import { verifyToken } from '../utils/jwt'
+import { UserRole } from '../types'
 
-const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret'
-
-export const authenticate = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  const token = req.cookies.token
-  if (!token) return res.status(401).json({ message: 'No token found' })
+export function authenticate(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies?.token
+  if (!token)
+    return res.status(401).json({ message: 'Authentication Required' })
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET)
-    req.user = decoded
+    const payload = verifyToken(token)
+    req.user = payload
     next()
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid token', err })
+  } catch (err: any) {
+    return res.status(401).json({ message: 'Invalid Token', err })
   }
 }
 
-export const authorizeRole =
-  (roles: string[]) => (req: Request, res: Response, next: NextFunction) => {
-    if (!req.user || !roles.includes(req.user.role)) {
-      return res.status(403).json({ message: 'Forbidden' })
-    }
+export function authorizeRole(allowedRoles: UserRole[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user
+    if (!user || !allowedRoles.includes(user.role))
+      return res.status(403).json({ message: 'Forbidden Access' })
 
     next()
   }
+}
+
+//RBAC - efficient and scalable for permission systems
